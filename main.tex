@@ -1,0 +1,218 @@
+\documentclass[11pt]{article}
+
+%FOR SCRIBES: Please change the next three lines to reflect the correct
+%FOR SCRIBES: lecture number, name, and date.
+\newcommand{\lecturenumber}{12}
+\newcommand{\scribename}{{Navneel Singhal}}
+\newcommand{\lecturedate}{2 February 2022}
+
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage{mathtools}
+\newcommand{\etal}{{\em et al.}}
+\newcommand{\qed}{\mbox{}\hspace*{\fill}\nolinebreak\mbox{$\rule{0.6em}{0.6em}$}}
+\newcommand{\nl}{\vspace*{0.3cm}\\}
+\newcommand{\expect}{{\bf \mbox{\bf E}}}
+\newcommand{\prob}{{\bf \mbox{\bf Pr}}}
+
+%--------------------------- Commands and Environments I added -----------------
+\usepackage[english]{babel}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\renewcommand{\baselinestretch}{1.10}
+%%      Fonts:
+%%---------------------------------------------------------------------------
+\newfont{\bssten}{cmssbx10}
+\newfont{\bssnine}{cmssbx10 scaled 900}
+\newfont{\bssdoz}{cmssbx10 scaled 1200}
+
+%---------------------------------------------------------------------------
+\newcounter{topic} \setcounter{topic}{0}
+\newcommand{\topic}[1]{\par \refstepcounter{topic} {\bssdoz \arabic{topic}.~ #1} \par}
+%\newcommand{\topic}[1]{\par \refstepcounter{topic} \vs{2ex} {\bssdoz \arabic{topic}.~ #1} \par \vs{1ex}}
+
+%------------------------------ end of new commands and evironments ------------
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\redospace}{\small\renewcommand{\baselinestretch}{1.5}\normalsize}
+\newcommand{\undospace}{\small\renewcommand{\baselinestretch}{1}\normalsize}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+%----------------------------- some other things I added ---------------------
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{protocol}[theorem]{Protocol}
+%----------------------------------------------------------------------------
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{proposition}[theorem]{Proposition}
+\newenvironment{proof}{{\bf Proof:}}{$\qed$\par}
+\newenvironment{proofof}[1]{{\bf Proof of #1:}}{$\qed$\par}
+\newenvironment{proofsketch}{{\sc{Proof Outline:}}}{$\qed$\par}
+
+\usepackage{hyperref}
+\hypersetup{
+	bookmarksnumbered
+}
+
+
+	
+	\begin{document}
+		%{	\color{blue}   \textbf{Edit the parts in blue and remove this part}}
+		\begin{center}
+			\framebox{\parbox{6.5in}{
+					{\bf{ELL888 Indian Institute of Technology Delhi} }\\ 
+					{\bf  {\color{blue} Lecture 12\; {VC Dimension}}}
+					\\
+					{Scribed by: {\color{blue}\textit{Navneel Singhal (2018CS10360)}}\\ Instructors:
+						 Sandeep Kumar and Jayadeva}
+			}}
+			\ \\
+		\end{center}
+%		\noindent{\bf Note}: {LaTeX template courtesy of UC Berkeley EECS dept.}
+		
+		\noindent {\bf Disclaimer}: {These notes have not been subjected to the
+			usual scrutiny reserved for formal publications.  They may be distributed
+			outside this class only with the permission of the Course Coordinator.}
+		\vspace*{4mm}
+		%\setcounter{section}{\lecturenumber}
+		%FOR SCRIBES: ---------- Begin Scribing Here ------------------------
+
+        \tableofcontents
+        \newpage
+
+\section{Brief recap}
+We shall continue our discussion of machine complexity and VC dimension from the last lecture. Before that, let us briefly recap what we had discussed earlier.\nl
+The motivating idea behind machine/model complexity is to find the ``simplest'' model that can perform a certain task (such as classification). This is important since models with too many degrees
+of freedom tend to overfit and perform poorly on test data. There are multiple measures for model complexity, a popular one of which is the \emph{Vapnik Chervonenkis dimension} (or the VC
+dimension).\nl
+Suppose there is a function $f^*$ from an input space $X$ to a boolean alphabet. Our goal is, given some $0 \le \varepsilon, \delta \le 1$, to produce a learning machine with probability at least $(1
+- \delta)$, that will correctly predict $f^*(x)$ for at least a fraction of $(1 - \varepsilon)$ future (test) exemplars. This learning is accomplished using exemplars $(x, f^*(x))$ for some $x
+\in X$ according to any distribution, and a correct prediction based on learning from exemplars is called a valid generalization. We want our machine to satisfy the conditions of efficient
+learning, and these bounds hold under the assumption of distribution-free learning (i.e., these bounds hold regardless of the distribution from which the input samples $x \in X$ were picked
+from $X$).
+% Note that in practice, the distribution of the picked samples affects the performance (since, for example, boundary exemplars carry more information).
+% A more predictive model would not necessarily just stop getting better after a certain number of samples, but it will also be able to identify better samples and use them.
+\nl
+From here, a natural question arises: how well does a machine learn using $N$ samples? And what is the guarantee that learning the function well on samples will also ensure good performance on
+the test samples? An answer to these questions is that it depends on things such as the number of learnable parameters in the networks and the number of parameters necessary to specify the
+function, and the VC dimension gives us a way to tackle these questions.\nl
+Suppose we want to learn a function $f^*$. Let's define the \emph{generalization probability} $G(f)$ for a function $f \in \mathcal{F}$ (the hypothesis space) as the probability that $f(x) = f^*(x)$ where $x$ is drawn from the input space $X$ with a
+distribution $P$. Let us also define $g_N(f)$ as the same probability defined for the $N$ samples instead. Then for robust learning, we want that the probability that $g_N(f)$ differs
+significantly from $G(f)$ is very small. That is, we want a bound of the form \[\mathrm{Pr}[\sup_{f \in \mathcal{F}}|g_N(f) - G(f)| > \varepsilon] \le \delta\]
+We will also impose uniform convergence conditions, since we would expect that for large enough $N$, $g_N(f)$ should be close to $G(f)$ for a robust learning algorithm.
+
+\section{Significance of the VC dimension}
+
+Vapnik and Chervonenkis showed that in this setting, we have the following bound:
+
+\[
+\mathrm{Pr}[\sup_{f \in \mathcal{F}}|g_N(f) - G(f)| > \varepsilon] \le 6 \Delta_f(2N) \exp(-\varepsilon^2 N / 4)
+\]
+Here $\Delta_f(N)$ is a measure of the size of $\mathcal{F}$, or in other words, the function representation capacity of the network. It is also appropriately known as the growth function, since
+it tells us how quickly the size of $\mathcal{F}$ grows with the number of training samples $N$. This is in line with the observation that as we increase the number of samples, the number of
+functions we can learn over those samples increases.\nl
+This essentially says that the probability that we will find a bad classifier is upper bounded by a function of the size of $\mathcal{F}$ (and the number of training samples). If this growth is
+sub-exponential in $N$ (for instance, polynomial), then the decaying exponential term dominates for large enough $N$, and hence with a large enough number of samples, we can make the probability of choosing a bad classifier arbitrarily
+small.\nl
+However, things change when the growth function is also exponential. For instance, suppose $\Delta_f(2N) = \exp(\alpha N)$. Then the bound is proportional to $\exp((\alpha -
+\varepsilon^2/4) N)$, so depending on the sign of $\alpha - \varepsilon^2 / 4$, it might be possible that the upper bound doesn't go to $0$ as $N \to \infty$, which renders this bound useless,
+i.e., we can't say anything about how increasing the number of samples affects the learning algorithm and the guarantees of it for learning a good enough classifier.
+Note that it is possible that this bound is not tight, so it might be possible that the probability goes to $0$ but the upper bound doesn't go to $0$.\nl
+This bound is important in the sense that it says something about the sufficient conditions for a concept to be learnable, and thus $\Delta_f$ is a function that is worth looking at. Note that
+here we have moved away from the idea of the complexity of the dataset, and we are instead focusing on a property of the space of functions that are learnable by the algorithm. This will simplify the
+analysis quite a bit, while also giving us non-trivial bounds that can allow us to reason about learnability.\nl
+The VC dimension $d_{\text{VC}}$ enters the picture in the following equation:
+\[
+    \Delta_f(N) \approx N^{d_{\text{VC}}} + 1
+\]
+Now that we have an understanding of why this ``VC dimension'' is so important, let's go and make this idea more precise.
+
+\section{Shattering and VC dimension}
+
+We will now look at the idea of shattering.
+
+\begin{definition}
+    A set of $k$ points is said to be \emph{shattered} if for every possible binary labelling of these $k$ points, there is an $f \in \mathcal{F}$ that can represent this labelling.
+\end{definition}
+To understand this definition, we start off by giving a few examples.
+
+\begin{example}
+Suppose we have 2 points $x^1$ and $x^2$ in $\mathbb{R}$ (in general position, i.e., for $d$ dimensions, no subset of $d + 1$ points lies on a $d - 1$ dimensional hyperplane), and $\mathcal{F}$ is the set of classifiers of the form $w^\intercal x + b \le 0$. Then $\{x^1, x^2\}$ is shattered
+by $\mathcal{F}$ as can be seen in the following figure.
+\begin{center}
+\includegraphics[width=0.75\textwidth]{shattering.png}
+\end{center}
+Similarly, it is easy to check that any set of 3 points in general position can be shattered as well. However, no set of 4 points can be shattered, as can be seen in the following two exhaustive
+cases for points in general position (degenerate cases with more than two points on a line are handled similarly).
+\begin{center}
+\includegraphics[width=0.75\textwidth]{impossible-shattering.png}
+\end{center}
+\end{example}
+Now that we have an understanding of shattering, we can define the VC dimension of a  hypothesis space $\mathcal{F}$.
+\begin{definition}
+    The \emph{VC dimension} of a hypothesis space $\mathcal{F}$ is the largest size of a set of points that can be shattered by a member of $\mathcal{F}$.
+\end{definition}
+\begin{example}
+    In the previous example, the VC dimension of $\mathcal{F}$ is $3$, since there is a set of 3 points which can be shattered by $\mathcal{F}$, and no set of 4 points can be shattered by
+    $\mathcal{F}$.
+\end{example}
+\begin{remark}
+    It can be shown that the VC dimension of hyperplane classifiers in $n$ dimensions is $n + 1$.
+\end{remark}
+\begin{remark}
+    Hyperplanes have been studied extensively in the context of model complexity, and the reason is that they are some of the simplest constructs, and they have properties that make them
+    mathematically tractable and amenable to analysis. It also turns out that due to the kernel trick, and the fact that in a sufficiently high dimensional space, all problems are linearly separable,
+    we can work with hyperplanes and still retain a large amount of generality while working with them.
+\end{remark}
+Note that in this definition, it is not necessary that we should be able to shatter \emph{all} possible sets of size $\text{VC}(\mathcal{F})$; it is sufficient to have at least one possible set of
+this size. However, to be able to claim that $k$ is equal to $\text{VC}(\mathcal{F})$, the following statements need to be true:
+\begin{enumerate}
+    \item There is at least one set of $k$ points which can be shattered.
+    \item There is no set of $k + 1$ points which can be shattered.
+\end{enumerate}
+The VC dimension can thus essentially be thought of as a measure of the capacity of a set of functions.\nl
+Note that an important question is the following: given a dataset (a set of samples), what is the required model complexity to be able to learn that dataset? The reason why this question is so
+important is that answering this would give us more precise data-specific bounds on how complex our model should be, which is something that the VC dimension completely ignores. However, this question
+has largely not been answered yet.\nl
+In the same context, one aspect of the samples that seems important, but is missing from the idea of the VC dimension, is the relative arrangement of the data points, in the sense that it is
+sufficient to exhibit a single arrangement of points which are shattered, whether that arrangement is relevant to our dataset or not.\nl
+Another thing that is somehow counterintuitive according to this definition is that there may exist learning machines with one parameter, but infinite VC dimension. Such a learning machine exists
+due to the same fact -- we can claim that the VC dimension is at least $k$ if there is at least one set of $k$ points which can be shattered.
+\begin{example}
+    (due to E. Levin and J.S. Denker) Let $\theta : \mathbb{R} \to \{-1, 1\}$ be defined as $\theta(x) = 1$ iff $x > 0$. Let $\mathcal{F}$ be the family of functions $\{f_\alpha \mid \alpha \in
+    \mathbb{R}\}$ where $f_\alpha(x) = \theta(\sin(\alpha x))$. Suppose we are given a positive integer $l$, and we have to choose a set of $l$ points that can be shattered. We pick $x_i =
+    10^{-i}$. Suppose the assigned labels are $\{y_i\}_{i = 1}^l$. Consider $\alpha = \pi \cdot \left(1 + \sum_{i = 1}^l \frac{(1 - y_i) \cdot 10^i}{2} \right)$. It is easy to check that
+    $f_\alpha(x_i) = y_i$ for all $i$, so the VC dimension of $\mathcal{F}$ is unbounded (or in other words, infinite).\nl
+    However, we can also find a set of 4 equidistant points which can't be shattered (for instance, an example where the second point in the natural order is classified into a different class than
+    the rest), but that doesn't affect the fact that the VC dimension of this set of functions is infinite.
+\end{example}
+What does such an example entail? The VC dimension being infinite implies that we can't use the bound involving the growth function to talk about the probability of choosing a bad
+classifier.\nl
+More on this topic can be read from \cite{burges}.
+\section{Gap tolerant classifiers}
+
+We will start off with some motivation. The VC dimension bounds mentioned above don't take into account any property of the data. Let's suppose the input data is $n$ dimensional. Firstly, note that the extent of usual sample data is not infinite, so there exists a
+ball/hypersphere of some radius $R$ in $\mathbb{R}^n$ which contains all the samples. Let $R$ be the radius of the smallest such hypersphere. We want to somehow take this into consideration. Also, it
+is hard to account for misclassifications near the decision boundary as well. With these ideas in mind, we define gap tolerant classifiers.
+\begin{definition}
+    A gap tolerant classifier is a classifier that
+\end{definition}
+	
+	\bibliographystyle{plain}
+	\begin{thebibliography}{10}
+		\bibitem{vapnik}
+        Vapnik, V.N., 1999. An overview of statistical learning theory. \emph{IEEE transactions on neural networks, 10}(5), pp.988-999.
+        \bibitem{burges}
+        Burges, C.J., 1998. A tutorial on support vector machines for pattern recognition. \emph{Data mining and knowledge discovery, 2}(2), pp.121-167.
+        \bibitem{moore}
+        Moore, A.W., 2001. VC-dimension for characterizing classifiers. \emph{Retrieved from} \texttt{https://www.cs.cmu.edu/\textasciitilde./awm/tutorials/vcdim08.pdf} % has certain errors
+	\end{thebibliography}
+\end{document}

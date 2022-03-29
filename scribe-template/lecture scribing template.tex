@@ -1,0 +1,112 @@
+\documentclass[11pt]{article}
+
+%FOR SCRIBES: Please change the next three lines to reflect the correct
+%FOR SCRIBES: lecture number, name, and date.
+\newcommand{\lecturenumber}{1}
+\newcommand{\scribename}{{Parul Singh}}
+\newcommand{\lecturedate}{16 Nov 2020} 
+
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage{mathtools}
+\newcommand{\etal}{{\em et al.}}
+\newcommand{\qed}{\mbox{}\hspace*{\fill}\nolinebreak\mbox{$\rule{0.6em}{0.6em}$}}
+\newcommand{\expect}{{\bf \mbox{\bf E}}}
+\newcommand{\prob}{{\bf \mbox{\bf Pr}}}
+
+%--------------------------- Commands and Environments I added -----------------
+\usepackage[english]{babel}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\renewcommand{\baselinestretch}{1.10}
+%%      Fonts:
+%%---------------------------------------------------------------------------
+\newfont{\bssten}{cmssbx10}
+\newfont{\bssnine}{cmssbx10 scaled 900}
+\newfont{\bssdoz}{cmssbx10 scaled 1200}
+
+%---------------------------------------------------------------------------
+\newcounter{topic} \setcounter{topic}{0}
+\newcommand{\topic}[1]{\par \refstepcounter{topic} {\bssdoz \arabic{topic}.~ #1} \par}
+%\newcommand{\topic}[1]{\par \refstepcounter{topic} \vs{2ex} {\bssdoz \arabic{topic}.~ #1} \par \vs{1ex}}
+
+%------------------------------ end of new commands and evironments ------------
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\redospace}{\small\renewcommand{\baselinestretch}{1.5}\normalsize}
+\newcommand{\undospace}{\small\renewcommand{\baselinestretch}{1}\normalsize}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+%----------------------------- some other things I added ---------------------
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{protocol}[theorem]{Protocol}
+%----------------------------------------------------------------------------
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{proposition}[theorem]{Proposition}
+\newenvironment{proof}{{\bf Proof:}}{$\qed$\par}
+\newenvironment{proofof}[1]{{\bf Proof of #1:}}{$\qed$\par}
+\newenvironment{proofsketch}{{\sc{Proof Outline:}}}{$\qed$\par}
+
+\usepackage{hyperref}
+\hypersetup{
+	bookmarksnumbered
+}
+
+
+	
+	\begin{document}
+		%{	\color{blue}   \textbf{Edit the parts in blue and remove this part}}
+		\begin{center}
+			\framebox{\parbox{6.5in}{
+					{\bf{ELL780 ELL 457 Indian Institute of Technology Delhi} }\\ 
+					{\bf  {\color{blue} Lecture 2\; {Topic name}}}
+					\\
+					{Scribed by: {\color{blue}\textit{Your names}},\\ Instructors:
+						 Sandeep Kumar and Jayadeva}
+			}}
+			\ \\
+		\end{center}
+%		\noindent{\bf Note}: {LaTeX template courtesy of UC Berkeley EECS dept.}
+		
+		\noindent {\bf Disclaimer}: {These notes have not been subjected to the
+			usual scrutiny reserved for formal publications.  They may be distributed
+			outside this class only with the permission of the Course Coordinator.}
+		\vspace*{4mm}
+		\setcounter{section}{\lecturenumber}
+		%FOR SCRIBES: ---------- Begin Scribing Here ------------------------
+	
+\section{Introduction}
+
+
+
+\section{1}
+
+
+
+\section{2}
+
+
+
+\section{3}
+
+	
+	\bibliographystyle{plain}
+	\begin{thebibliography}{10}
+		\bibitem{mr:random}
+	Cormen TH, Leiserson CE, Rivest RL, Stein C. 
+		\newblock {\em Introduction to algorithms.}.
+		\newblock MIT press.	2009 Jul 31
+	\end{thebibliography}
+	
+	
+	
+\end{document}
