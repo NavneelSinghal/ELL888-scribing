@@ -2,10 +2,11 @@
 
 %FOR SCRIBES: Please change the next three lines to reflect the correct
 %FOR SCRIBES: lecture number, name, and date.
-\newcommand{\lecturenumber}{12}
+\newcommand{\lecturenumber}{13}
 \newcommand{\scribename}{{Navneel Singhal}}
 \newcommand{\lecturedate}{2 February 2022}
 
+\usepackage[numbib]{tocbibind}
 \usepackage{subfigure}
 \usepackage{color}
 \usepackage{url}
@@ -69,7 +70,7 @@
 		\begin{center}
 			\framebox{\parbox{6.5in}{
 					{\bf{ELL888 Indian Institute of Technology Delhi} }\\ 
-					{\bf  {\color{blue} Lecture 12\; {VC Dimension}}}
+					{\bf  {\color{blue} Lecture 13\; {VC Dimension}}}
 					\\
 					{Scribed by: {\color{blue}\textit{Navneel Singhal (2018CS10360)}}\\ Instructors:
 						 Sandeep Kumar and Jayadeva}
@@ -108,7 +109,7 @@ Suppose we want to learn a function $f^*$. Let's define the \emph{generalization
 distribution $P$. Let us also define $g_N(f)$ as the same probability defined for the $N$ samples instead. Then for robust learning, we want that the probability that $g_N(f)$ differs
 significantly from $G(f)$ is very small. That is, we want a bound of the form \[\mathrm{Pr}[\sup_{f \in \mathcal{F}}|g_N(f) - G(f)| > \varepsilon] \le \delta\]
 We will also impose uniform convergence conditions, since we would expect that for large enough $N$, $g_N(f)$ should be close to $G(f)$ for a robust learning algorithm.
-
+\newpage
 \section{Significance of the VC dimension}
 
 Vapnik and Chervonenkis showed that in this setting, we have the following bound:
@@ -134,7 +135,7 @@ The VC dimension $d_{\text{VC}}$ enters the picture in the following equation:
     \Delta_f(N) \approx N^{d_{\text{VC}}} + 1
 \]
 Now that we have an understanding of why this ``VC dimension'' is so important, let's go and make this idea more precise.
-
+\newpage
 \section{Shattering and VC dimension}
 
 We will now look at the idea of shattering.
@@ -197,22 +198,65 @@ due to the same fact -- we can claim that the VC dimension is at least $k$ if th
 What does such an example entail? The VC dimension being infinite implies that we can't use the bound involving the growth function to talk about the probability of choosing a bad
 classifier.\nl
 More on this topic can be read from \cite{burges}.
-\section{Gap tolerant classifiers}
+\newpage
+\section{Gap tolerant classifiers and structural risk minimization}
 
-We will start off with some motivation. The VC dimension bounds mentioned above don't take into account any property of the data. Let's suppose the input data is $n$ dimensional. Firstly, note that the extent of usual sample data is not infinite, so there exists a
+Before we talk about gap tolerant classifiers, we shall talk about structural risk minimization. From all our discussion about VC dimension, it seems that we can avoid overfitting by learning
+models that are not too complex. This is why sometimes we incorporate the model complexity in the loss function to be optimized for, for the purposes of model selection. This is called
+structural risk minimization.\nl
+We will start off with some motivation for gap tolerant classifiers. The VC dimension bounds mentioned above don't take into account any property of the data. Let's suppose the input data is $n$ dimensional. Firstly, note that the extent of usual sample data is not infinite, so there exists a
 ball/hypersphere of some radius $R$ in $\mathbb{R}^n$ which contains all the samples. Let $R$ be the radius of the smallest such hypersphere. We want to somehow take this into consideration. Also, it
 is hard to account for misclassifications near the decision boundary as well. With these ideas in mind, we define gap tolerant classifiers.
 \begin{definition}
-    A gap tolerant classifier is a classifier that
+    A gap tolerant classifier is an SVM-like classifier characterized by two hyperplanes and a hypersphere, where the points outside the sphere or inside the margin between the two hyperplanes are always
+    deemed to be correctly classified.
 \end{definition}
-	
+An example of such a classifier can be seen below.
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{gap-tolerant-classifier.png}
+\end{center}
+Points colored red/blue are in class $-1$/$1$ respectively, and we don't care about the classification of points inside the green margin (or outside the hypersphere). All points on one side of the
+fat margin should be of a certain class (which is why such classifiers are also called fat-margin classifiers), but the points inside the margin are irrelevant. \cite{burges} notes that for
+such classifiers, it is important to use the precise definition of shattering in order to compute the VC dimension (rather than the one used earlier) -- for every possible binary labelling, there is an $f$ that can incorrectly label all
+the points (rather than correctly label all points). These classifiers are significant because of the following concrete bound on the VC dimension of this family of classifiers, first
+proved by Vapnik in \cite{vapnik2}:
+
+\begin{theorem}
+    For a gap-tolerant classifier (for $n$-dimensional data) with the diameter of hypersphere being $D = 2R$ and the width of the margin being $d_{\min}$, the VC dimension is upper bounded by
+    $\min\left(\left\lceil\frac{4R^2}{d_{\min}^2}\right\rceil,
+        n\right) + 1$.
+\end{theorem}
+For a given dataset, as mentioned earlier, we can use a gap-tolerant classifier with the hypersphere being the smallest hypersphere that can contain all the points in order to minimize this
+bound, while keeping $d$ constant. Note that we don't want $d_{\min}$ to be too large, else it would make our model crude (since we would ignore too many input samples), and we don't want
+it to be too small either, else we would not get an appreciable reduction in the VC dimension. What we are doing here is an instance of structural risk minimization, since we are directly trying
+to minimize the bound on the VC dimension, which is a measure of model complexity.\nl
+Let's look at what happens in the special case when the data is linearly separable. For some given data, the value of $R$ is constant, so the problem reduces to minimizing
+$\frac{1}{d_{\min}^2}$. When the data is linearly separable, and we wish to learn a classifier which doesn't have any misclassifications, we have $d_{\min} = \frac{2}{||w||}$ (the
+distance from the hyperplane to the closest sample) for a given
+hyperplane classifier $w^\intercal x + b$. So the problem reduces to maximizing the margin, which is essentially an SVM. However, there is a problem with this. An argument against this is
+that when we apply some transformation to the data, for instance, scaling, then both the $R$ and $d_{\min}$ (as well as $\frac{R^2}{d_{\min}^2}$) change in non-linear ways, which will in turn affect
+the bound on the VC dimension (which we will call the radius-margin bound).
+This is in fact well-known and corroborates the fact that pre-processing of data in ways like normalization can be helpful for SVMs. There has been work on finding similar bounds for deep
+neural networks as well, for instance \cite{sharma}, showing that this idea is not just specific to a certain kind of machine learning models.\nl
+Coming back from the digression, this means that we need to do something that is more robust against such changes. As we will see later on, minimal complexity machines are models which minimize
+a function of some affine functions of the input samples as an drop-in replacement for the $\frac{R^2}{d_{\min}^2}$ bound, which makes them resistant to scaling. Just like SVMs, they have their
+own soft-margin and kernel versions which perform quite well (and have better VC dimension/generalization properties in general, compared to their SVM counterparts). For more information, please refer to \cite{jayadeva}.
+
+\newpage
 	\bibliographystyle{plain}
 	\begin{thebibliography}{10}
 		\bibitem{vapnik}
         Vapnik, V.N., 1999. An overview of statistical learning theory. \emph{IEEE transactions on neural networks, 10}(5), pp.988-999.
+		\bibitem{vapnik2}
+        Vapnik, V.N., 1998. Statistical Learning Theory. \emph{Wiley, New York.}
         \bibitem{burges}
         Burges, C.J., 1998. A tutorial on support vector machines for pattern recognition. \emph{Data mining and knowledge discovery, 2}(2), pp.121-167.
         \bibitem{moore}
         Moore, A.W., 2001. VC-dimension for characterizing classifiers. \emph{Retrieved from} \texttt{https://www.cs.cmu.edu/\textasciitilde./awm/tutorials/vcdim08.pdf} % has certain errors
+        \bibitem{jayadeva}
+        Jayadeva, 2015. Learning a hyperplane classifier by minimizing an exact bound on the VC dimension. \emph{Neurocomputing, 149}, pp.683-689.
+        \bibitem{sharma}
+        Sharma, M. and Soman, S., 2018. Radius-margin bounds for deep neural networks. \emph{arXiv preprint arXiv:1811.01171.}
 	\end{thebibliography}
 \end{document}
